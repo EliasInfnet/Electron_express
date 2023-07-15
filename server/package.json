@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
+    "build": "rollup -c",
+    "pack": "pkg -o pack/executable.exe -t node14-win-x64 dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +15,14 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "knex": "^2.5.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.3",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "pkg": "^5.8.1",
+    "rollup": "^3.26.2"
   }
 }

@@ -1,8 +1,15 @@
 import { app, shell, BrowserWindow } from 'electron'
-import { join } from 'path'
+import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { spawn } from 'child_process'
 
+const serverPath = path.join(app.getAppPath(), 'server', 'src', 'server.js');
+const childProcess = spawn('node', ['--experimental-modules', serverPath])
+
+childProcess.on('spawn',() => {
+  console.log('spawn')
+})
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
