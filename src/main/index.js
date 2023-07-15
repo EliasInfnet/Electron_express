@@ -1,15 +1,10 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, Notification } from 'electron'
 import path, { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { spawn } from 'child_process'
+import { execFile, spawn } from 'child_process'
 
-const serverPath = path.join(app.getAppPath(), 'server', 'src', 'server.js');
-const childProcess = spawn('node', ['--experimental-modules', serverPath])
 
-childProcess.on('spawn',() => {
-  console.log('spawn')
-})
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -63,6 +58,26 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+}).then(() => {
+  if (!is.dev) {
+    const appPath = path.dirname(path.dirname(path.join(app.getAppPath())))
+    const serverPath = path.join(appPath, 'server', 'executable.exe')
+
+    const childProcess = execFile(serverPath, () => {
+      console.log('rodando server')
+    })
+
+    childProcess.on('spawn', () => {
+      console.log('spawn')
+    })
+
+    new Notification({
+      title: 'Server Path',
+      body: serverPath,
+      silent: true
+    }).show()
+  }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
