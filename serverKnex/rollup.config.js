@@ -8,7 +8,7 @@ export default {
     file: 'dist/server.js',
     format: 'cjs'
   },
-  external: ['knex'],
+  external: ['knex', 'better-sqlite3'],
   plugins: [
     nodeResolve(),
     commonjs(),

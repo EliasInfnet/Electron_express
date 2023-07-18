@@ -9,14 +9,15 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
 extraFiles:
-  from: 'server/pack/executable.exe'
-  to: 'server/executable.exe'
+  - from: 'server/pack/executable.exe'
+    to: 'server/executable.exe'
+  - from: 'data/prod/db.db'
+    to: 'data/db.db'
 asarUnpack:
   - resources/**
 afterSign: build/notarize.js
 win:
   executableName: electron_express_build
-  requestedExecutionLevel: requireAdministrator
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

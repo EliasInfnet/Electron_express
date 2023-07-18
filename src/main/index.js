@@ -1,12 +1,27 @@
 import { app, shell, BrowserWindow, Notification } from 'electron'
 import path, { join } from 'path'
+import fs from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { execFile, spawn } from 'child_process'
+// import { exec } from 'pkg'
+
+function writeToFile(text) {
+  const documentsFolder = 'C:\\Users\\elias\\Documents';
+  const filePath = path.join(documentsFolder, 'outputElectron.txt');
+
+  try {
+    fs.appendFileSync(filePath, text + '\n');
+    console.log('Text has been written to the file successfully.');
+  } catch (error) {
+    console.error('An error occurred while writing to the file:', error);
+  }
+}
+
+// Create the browser window.
 
 
 function createWindow() {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
@@ -15,12 +30,13 @@ function createWindow() {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      devTools: true
     }
   })
-
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    mainWindow.webContents.openDevTools()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -36,6 +52,7 @@ function createWindow() {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -63,20 +80,57 @@ app.whenReady().then(() => {
   if (!is.dev) {
     const appPath = path.dirname(path.dirname(path.join(app.getAppPath())))
     const serverPath = path.join(appPath, 'server', 'executable.exe')
+    // const serverPath = "C:/Users/elias/Desktop/Javascript/Electron/electron_express_build/server/pack/executable.exe"
 
-    const childProcess = execFile(serverPath, () => {
-      console.log('rodando server')
+    const childProcess = execFile(serverPath, {
+      env: {
+        NODE_ENV: 'production',
+        ELECTRON_APP_PATH: appPath
+      }
+    }, (error, stdout, stderr) => {
+      if (error) {
+        writeToFile(`error.message ${error.message}`)
+      }
+      if (stdout) {
+        writeToFile(`stdout ${stdout}`)
+      }
+      if (stderr) {
+        writeToFile(`stderr ${stderr}`)
+      }
     })
 
-    childProcess.on('spawn', () => {
-      console.log('spawn')
+    childProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      console.log(output);
     })
 
-    new Notification({
-      title: 'Server Path',
-      body: serverPath,
-      silent: true
-    }).show()
+    childProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      console.log(output);
+    })
+
+    // exec([serverPath]).then(() => console.log('exec'))
+  } else {
+    // const appPath = path.dirname(path.dirname(path.join(app.getAppPath())))
+    // const serverPath = path.join(appPath, 'server', 'executable.exe')
+    const serverPath = "C:/Users/elias/Desktop/Javascript/Electron/electron_express_build/server/src/server.js";
+
+    const childProcess = spawn('node', [serverPath], {
+      env: {
+        NODE_ENV: 'development',
+        ELECTRON_APP_PATH: 'C:/Users/elias/Desktop/Javascript/Electron/electron_express_build/data/dev/db.db'
+      }
+    });
+
+    childProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      console.log(output);
+    })
+
+    childProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      console.log(output);
+    })
   }
 })
 
